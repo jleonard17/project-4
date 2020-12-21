@@ -4,6 +4,8 @@ require('model/database.php');
 require('model/accounts_db.php');
 require('model/questions_db.php');
 
+session_start();
+
 $action = filter_input(INPUT_POST, 'action');
 if ($action == NULL) {
     $action = filter_input(INPUT_GET, 'action');
@@ -14,7 +16,11 @@ if ($action == NULL) {
 
 switch ($action) {
     case 'show_login': {
-        include('views/login.php');
+        if($_SESSION['userId']){
+            header('Location: .?action=display_questions');
+        } else{
+            include('views/login.php');
+        }
         break;
     }
 
@@ -31,7 +37,8 @@ switch ($action) {
             if ($userId == false) {
                 header("Location: .?action=display_registration");
             } else {
-                header("Location: .?action=display_questions&userId=$userId");
+                $_SESSION['userId'] = $userId;
+                header("Location: .?action=display_questions");
             }
         }
 
@@ -62,7 +69,7 @@ switch ($action) {
     }
 
     case 'display_questions':{
-        $userId = filter_input(INPUT_GET, 'userId');
+        $userId = $_SESSION['userId'];
         $listType = filter_input(INPUT_GET, 'listType');
         if ($userId == NULL || $userId < 0) {
             header('Location: .?action=show_login');
@@ -103,6 +110,17 @@ switch ($action) {
         break;
         }
 
+    case 'delete_question': {
+        $questionId = filter_input(INPUT_POST,'questionId');
+        $userId = filter_input(INPUT_POST,'userId');
+        if($questionId == NULL || $userId == NULL){
+            $error = 'All fields required';
+            include('errors/error.php');
+        } else{
+            delete_question($questionId);
+            header("Location: .?action=display_questions&userId=$userId");
+        }
+    }
 
 
     case 'display_users': {
@@ -115,6 +133,21 @@ switch ($action) {
             include('views/displayQuestions.php');
         }
     break;
+    }
+
+    case 'logout':{
+        session_destroy();
+        $_SESSION = array();
+
+        $name = session_name();
+        $expire = strtotime('-1 year');
+
+        $params = session_get_cookie_params();
+
+        setcookie($name, '', $expire, $params['domain'],$params['secure'],$params['httponly'] );
+
+        header('Location: .');
+        break;
     }
 
     default: {

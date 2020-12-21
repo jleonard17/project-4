@@ -27,6 +27,16 @@ function get_all_questions(){
     return $questions;
 }
 
+function delete_question($questionId){
+    global $db;
+
+    $query = 'DELETE FROM questions WHERE id = :questionId';
+    $statement = $db->prepare($query);
+    $statement->bindValue(':questionId', $questionId);
+    $statement->execute();
+    $statement->closeCursor();
+}
+
 function create_question ($title, $body, $skills, $ownerid){
     global $db;
 
