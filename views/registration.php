@@ -1,3 +1,4 @@
+
 <?php include('header.php'); ?>
 
     <h1 class="text-center title">Registration Form</h1>

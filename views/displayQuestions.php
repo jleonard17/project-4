@@ -4,6 +4,8 @@
     <a href=".?action=display_questions&userId=<?php echo $userId ?>&listType=mine">Show My Questions</a>
     <a href=".?action=display_questions&userId=<?php echo $userId ?>&listType=all">Show All Questions</a>
 
+    <h2>Questions for User with ID: <?php echo $userId; ?></h2>
+
     <table class="table">
         <tr>
             <th>Name</th>

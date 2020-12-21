@@ -1,6 +1,7 @@
 <?php
 
 require('model/database.php');
+require('model/account.php');
 require('model/accounts_db.php');
 require('model/questions_db.php');
 
@@ -32,7 +33,8 @@ switch ($action) {
             $error = "Email and Password not included";
             include('errors/error.php');
         } else {
-            $userId = validate_login($email, $password);
+            $user = AccountsDB::validate_login($email, $password);
+            $userId=$user->getId();
             echo "User ID IS: $userId";
             if ($userId == false) {
                 header("Location: .?action=display_registration");
@@ -57,7 +59,7 @@ switch ($action) {
             $error = 'enter required fields';
             include('errors/error.php');
         } else {
-            validate_registration($firstName, $lastName, $birthday, $email, $password);
+            AccountsDB::validate_registration($firstName, $lastName, $birthday, $email, $password);
             header("Location: .?action=display_questions&userId=$userId");
             }
         break;
@@ -75,7 +77,7 @@ switch ($action) {
             header('Location: .?action=show_login');
         } else {
             $questions = ($listType === 'all') ?
-                get_all_questions() : get_questions_by_ownerId($userId);
+                questions_db::get_all_questions() : questions_db::get_questions_by_ownerId($userId);
             include('views/displayQuestions.php');
         }
         break;
@@ -104,7 +106,7 @@ switch ($action) {
             include('errors/error.php');
         }
         else{
-            create_question($title,$body,$skills,$userId);
+            questions_db::create_question($title,$body,$skills,$userId);
             header("Location: .?action=display_questions&userId=$userId");
             }
         break;
@@ -117,23 +119,12 @@ switch ($action) {
             $error = 'All fields required';
             include('errors/error.php');
         } else{
-            delete_question($questionId);
+            questions_db::delete_question($questionId);
             header("Location: .?action=display_questions&userId=$userId");
         }
     }
 
 
-    case 'display_users': {
-        $userId = filter_input(INPUT_GET, 'userId');
-        if ($userId == NULL) {
-            $error = 'User Id unavailable';
-            include('errors/error.php');
-        } else {
-            $questions = get_questions_by_ownerId($userId);
-            include('views/displayQuestions.php');
-        }
-    break;
-    }
 
     case 'logout':{
         session_destroy();
